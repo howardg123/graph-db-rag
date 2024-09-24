@@ -1,0 +1,7 @@
+langchain
+langchain-community
+langchain-ollama
+neo4j
+fastapi[standard]
+pydantic
+python-dotenv

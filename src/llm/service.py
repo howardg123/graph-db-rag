@@ -1,6 +1,4 @@
-from langchain_community.graphs import Neo4jGraph
 from langchain.chains import GraphCypherQAChain
-from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 from .schemas import Question

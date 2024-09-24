@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from fastapi import Query
 
 
 class ModelEnum(str, Enum):

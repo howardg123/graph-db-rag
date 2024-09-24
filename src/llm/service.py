@@ -81,14 +81,11 @@ class Service:
         </Question>
         <Note>
         If the provided information is empty, respond by stating that you don't know the answer. Empty information is indicated by: []
-        Output only in JSON format instead of a sentence without any other text before and after the json
+        Output only in JSON format provided by the query results. Do not include any string before and after the JSON output.
         If the information is not empty, you must provide an answer using the results. If the question involves a time duration, assume the query results are in units of days unless specified otherwise.
         When names are provided in the query results, such as hospital names, be cautious of any names containing commas or other punctuation. For example, 'Jones, Brown and Murray' is a single hospital name, not multiple hospitals. Ensure that any list of names is presented clearly to avoid ambiguity and make the full names easily identifiable.
         Never state that you lack sufficient information if data is present in the query results. Always utilize the data provided.
         </Note>
-        <Example Output>
-        [{{movie_title: 'title1'}},{{movie_title: 'title2}}]
-        </Example Output>
         """
 
         llm = self.choose_model(question.model)

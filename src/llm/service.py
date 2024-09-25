@@ -17,7 +17,7 @@ class Service:
             "NEO4J_USERNAME"), password=os.getenv("NEO4J_PASSWORD"))
 
     def populate_data(self):
-        self.graphDB_instance.populate_data()
+        self.graphDB_instance.populate_data_hr()
         return {"result": self.graphDB_instance.get_graph().schema}
 
     def choose_model(self, model: str = ""):
@@ -48,6 +48,7 @@ class Service:
         statement (e.g. WITH c as customer, o.orderID as order_id).
         If you need to divide numbers, make sure to
         filter the denominator to be non-zero.
+        Always include id, full_name, position, department.
         </Note>
         <Examples>
         # Retrieve the total number of orders placed by each customer.
@@ -85,6 +86,7 @@ class Service:
         If the information is not empty, you must provide an answer using the results. If the question involves a time duration, assume the query results are in units of days unless specified otherwise.
         When names are provided in the query results, such as hospital names, be cautious of any names containing commas or other punctuation. For example, 'Jones, Brown and Murray' is a single hospital name, not multiple hospitals. Ensure that any list of names is presented clearly to avoid ambiguity and make the full names easily identifiable.
         Never state that you lack sufficient information if data is present in the query results. Always utilize the data provided.
+        Output format should be a list of dictionary containing the key: id, full_name, position, department
         </Note>
         """
 

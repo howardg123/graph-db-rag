@@ -12,24 +12,31 @@ class Neo4j:
     def get_graph(self):
         return self.graphDB
 
-    def populate_data(self):
+    def populate_data_hr(self):
+        # query = """
+        # MATCH (n)
+        # OPTIONAL MATCH (n)-[r]-()
+        # DELETE n,r
+        # """
+        # self.graphDB.query(query)
+        # self.graphDB.refresh_schema()
         query = """
-        LOAD CSV WITH HEADERS FROM 
-        'https://raw.githubusercontent.com/tomasonjo/blog-datasets/main/movies/movies_small.csv'
-        AS row
-        MERGE (m:Movie {id:row.movieId})
-        SET m.released = date(row.released),
-            m.title = row.title,
-            m.imdbRating = toFloat(row.imdbRating)
-        FOREACH (director in split(row.director, '|') | 
-            MERGE (p:Person {name:trim(director)})
-            MERGE (p)-[:DIRECTED]->(m))
-        FOREACH (actor in split(row.actors, '|') | 
-            MERGE (p:Person {name:trim(actor)})
-            MERGE (p)-[:ACTED_IN]->(m))
-        FOREACH (genre in split(row.genres, '|') | 
-            MERGE (g:Genre {name:trim(genre)})
-            MERGE (m)-[:IN_GENRE]->(g))
+        LOAD CSV WITH HEADERS FROM 'https://chm-ahgd001-dev-data-storage-assets.s3.ap-southeast-1.amazonaws.com/assets/product_urls/data.csv' AS row
+        MERGE (p:Person {id: row.id, full_name: row.full_name})
+        SET p.position = row.position,
+            p.department = row.department,
+            p.career_mentor = row.career_mentor,
+            p.tech_mentor = row.tech_mentor
+
+        WITH p, row
+        WHERE row.career_mentor IS NOT NULL AND trim(row.career_mentor) <> p.full_name
+        MERGE (c:Person {full_name: trim(row.career_mentor)})
+        MERGE (p)-[:IS_CAREER_MENTOR_OF]->(c)  // Employee is the mentor of their mentor
+
+        WITH p, row
+        WHERE row.tech_mentor IS NOT NULL
+        MERGE (t:Person {full_name: trim(row.tech_mentor)})
+        MERGE (p)-[:IS_TECH_MENTOR_OF]->(t);
         """
         self.graphDB.query(query)
         self.graphDB.refresh_schema()

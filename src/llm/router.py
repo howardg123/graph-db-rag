@@ -18,3 +18,9 @@ async def generate_response(question: Annotated[Question, Query()] = None):
 async def populate_data():
     response = Service().populate_data()
     return {"response": response}
+
+
+@llm_router.get("/delete_data")
+async def delete_data():
+    response = Service().delete_data()
+    return {"response": response}

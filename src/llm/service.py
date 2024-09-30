@@ -20,6 +20,10 @@ class Service:
         self.graphDB_instance.populate_data_hr()
         return {"result": self.graphDB_instance.get_graph().schema}
 
+    def delete_data(self):
+        self.graphDB_instance.delete_data_hr()
+        return {"result": self.graphDB_instance.get_graph().schema}
+
     def choose_model(self, model: str = ""):
         if model == "llama":
             return OllamaLLM(model="llama3.1", temperature=0)
@@ -48,7 +52,7 @@ class Service:
         statement (e.g. WITH c as customer, o.orderID as order_id).
         If you need to divide numbers, make sure to
         filter the denominator to be non-zero.
-        Always include id, full_name, position, department.
+        Always include id, full_name, position, department, tech_mentor, career_mentor.
         </Note>
         <Examples>
         # Retrieve the total number of orders placed by each customer.
@@ -62,6 +66,10 @@ class Service:
         # Find all employees who have processed orders.
         MATCH (e:Employee)-[r:PROCESSED_BY]->(o:Order)
         RETURN e.employeeID AS employee_id, COUNT(o) AS orders_processed
+        # Find the mentor of mentee
+        Use the relationship IS_CAREER_MENTOR_OF or IS_TECH_MENTOR_OF and return all information
+        # Find the mentees of mentor
+        Use the relationship IS_CAREER_MENTEE_OF or IS_TECH_MENTEE_OF and return all information
         String category values:
         Use existing strings and values from the schema provided. 
         </Examples>
@@ -83,11 +91,13 @@ class Service:
         <Note>
         If the provided information is empty, respond by stating that you don't know the answer. Empty information is indicated by: []
         Output only in JSON format provided by the query results. Do not include any string before and after the JSON output.
-        If the information is not empty, you must provide an answer using the results. If the question involves a time duration, assume the query results are in units of days unless specified otherwise.
         When names are provided in the query results, such as hospital names, be cautious of any names containing commas or other punctuation. For example, 'Jones, Brown and Murray' is a single hospital name, not multiple hospitals. Ensure that any list of names is presented clearly to avoid ambiguity and make the full names easily identifiable.
         Never state that you lack sufficient information if data is present in the query results. Always utilize the data provided.
-        Output format should be a list of dictionary containing the key: id, full_name, position, department
+        Output format should be a list of dictionary containing the key: id, full_name, position, department, tech_mentor, and career_mentor
         </Note>
+        <Example output>
+        [{{'id': '1001', 'full_name': 'Scott Stafford', 'position': 'CEO', 'department': ' None', 'tech_mentor': 'None', 'career_mentor': 'None'}}]
+        </Example output>
         """
 
         llm = self.choose_model(question.model)

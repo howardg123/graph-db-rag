@@ -12,14 +12,17 @@ class Neo4j:
     def get_graph(self):
         return self.graphDB
 
+    def delete_data_hr(self):
+        query = """
+        MATCH (n)
+        OPTIONAL MATCH (n)-[r]-()
+        DELETE n,r
+        """
+        self.graphDB.query(query)
+        self.graphDB.refresh_schema()
+        return {"result": self.graphDB.schema}
+
     def populate_data_hr(self):
-        # query = """
-        # MATCH (n)
-        # OPTIONAL MATCH (n)-[r]-()
-        # DELETE n,r
-        # """
-        # self.graphDB.query(query)
-        # self.graphDB.refresh_schema()
         query = """
         LOAD CSV WITH HEADERS FROM 'https://chm-ahgd001-dev-data-storage-assets.s3.ap-southeast-1.amazonaws.com/assets/product_urls/data.csv' AS row
         MERGE (p:Person {id: row.id, full_name: row.full_name})
@@ -31,12 +34,13 @@ class Neo4j:
         WITH p, row
         WHERE row.career_mentor IS NOT NULL AND trim(row.career_mentor) <> p.full_name
         MERGE (c:Person {full_name: trim(row.career_mentor)})
-        MERGE (p)-[:IS_CAREER_MENTOR_OF]->(c)  // Employee is the mentor of their mentor
-
+        MERGE (p)-[:IS_CAREER_MENTOR_OF]->(c)
+        MERGE (c)-[:IS_CAREER_MENTEE_OF]->(p)
         WITH p, row
         WHERE row.tech_mentor IS NOT NULL
         MERGE (t:Person {full_name: trim(row.tech_mentor)})
-        MERGE (p)-[:IS_TECH_MENTOR_OF]->(t);
+        MERGE (p)-[:IS_TECH_MENTOR_OF]->(t)
+        MERGE (t)-[:IS_TECH_MENTEE_OF]->(p)
         """
         self.graphDB.query(query)
         self.graphDB.refresh_schema()

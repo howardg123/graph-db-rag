@@ -1,5 +1,5 @@
 id,full_name,position,department,career_mentor,tech_mentor
-1001,Scott Stafford,CEO,,,
+1001,Scott Stafford,CEO, None, None, None
 1002,Bryan Wheeler,Department Head,Engineering,Scott Stafford,Scott Stafford
 1003,Kristin Johnson,Department Head,Product,Scott Stafford,Scott Stafford
 1004,Jeffery Dominguez,Department Head,Quality Assurance,Scott Stafford,Scott Stafford

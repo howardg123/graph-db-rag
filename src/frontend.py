@@ -14,7 +14,7 @@ def send_request(question: str):
         response = requests.post(url, params=payload)
         if response.status_code == 200:
             response_json = response.json().get('response', 'No answer found.')
-            return json.dumps(response_json, indent=4)
+            return ' '.join(json.dumps(response_json, indent=4).replace('"', '').replace("\\n", " ").strip().split())
         else:
             return f"Error: {response.status_code}"
     except Exception as e:

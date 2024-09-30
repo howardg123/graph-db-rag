@@ -1,4 +1,5 @@
 from langchain.chains import GraphCypherQAChain
+from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 from .schemas import Question
@@ -72,6 +73,7 @@ class Service:
         Use the relationship IS_CAREER_MENTEE_OF or IS_TECH_MENTEE_OF and return all information
         String category values:
         Use existing strings and values from the schema provided. 
+        Do not use AS
         </Examples>
         <Question>
         {question}
@@ -90,14 +92,16 @@ class Service:
         </Question>
         <Note>
         If the provided information is empty, respond by stating that you don't know the answer. Empty information is indicated by: []
-        Output only in JSON format provided by the query results. Do not include any string before and after the JSON output.
         When names are provided in the query results, such as hospital names, be cautious of any names containing commas or other punctuation. For example, 'Jones, Brown and Murray' is a single hospital name, not multiple hospitals. Ensure that any list of names is presented clearly to avoid ambiguity and make the full names easily identifiable.
         Never state that you lack sufficient information if data is present in the query results. Always utilize the data provided.
-        Output format should be a list of dictionary containing the key: id, full_name, position, department, tech_mentor, and career_mentor
+        Only output relevant information and only use purely text in output formatting. Do not use newline. Just answer the question, do not write any irrelevant sentences. Do not include the question in the output.
         </Note>
-        <Example output>
-        [{{'id': '1001', 'full_name': 'Scott Stafford', 'position': 'CEO', 'department': ' None', 'tech_mentor': 'None', 'career_mentor': 'None'}}]
-        </Example output>
+        <Format>
+        Question: Find is_tech_mentor_of William Hoover
+        Answer: Bryan Wheeler is the tech mentor of William Hoover
+        Question: Find is_tech_mentee_of Scott Stafford
+        Answer: Tech mentee of Scott Stafford are: Bryan Wheeler, Kristin Johnson, Jeffery Dominguez
+        </Format>
         """
 
         llm = self.choose_model(question.model)
@@ -124,7 +128,39 @@ class Service:
             allow_dangerous_requests=True
         )
 
+        rephrased_prompt = self.rephrase_prompt(question)
+
+        response = chain.invoke(
+            {rephrased_prompt})
+
+        return response.get("result", "")
+
+    def rephrase_prompt(self, question: Question) -> str:
+        template = """
+        <Note>
+        Rephrase the question to one of the following:
+        Find is_career_mentor_of <name>
+        Find is_tech_mentor_of <name>
+        Find is_career_mentee_of <name>
+        Find is_the_tech_mentee_of <name>
+        Find the department of <name>
+        Find the id of <name>
+        Find the full_name of <name>
+        Find the position of <name>
+        </Note>
+        <Question>
+        {question}
+        </Question>
+        <Output format>
+        Do not include any unnecessary sentences. Just output the rephrased question
+        </Output format>
+        """
+
+        prompt = ChatPromptTemplate.from_template(template)
+
+        chain = prompt | self.choose_model(question.model)
+
         response = chain.invoke(
             {question.question})
 
-        return response.get("result", "")
+        return response

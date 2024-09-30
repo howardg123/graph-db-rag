@@ -11,7 +11,13 @@ llm_router = APIRouter()
 @llm_router.post("/generate_response")
 async def generate_response(question: Annotated[Question, Query()] = None):
     response = Service().generate_response(question)
-    return {"response": json.loads(response)}
+    return {"response": response}
+
+
+@llm_router.post("/rephrase_prompt")
+async def rephrase_prompt(question: Annotated[Question, Query()] = None):
+    response = Service().rephrase_prompt(question)
+    return {"response": response}
 
 
 @llm_router.get("/populate_data")

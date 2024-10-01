@@ -53,7 +53,7 @@ class Service:
         statement (e.g. WITH c as customer, o.orderID as order_id).
         If you need to divide numbers, make sure to
         filter the denominator to be non-zero.
-        Always include id, full_name, position, department, tech_mentor, career_mentor.
+        Always include id, full_name, position, department, tech_mentor, career_mentor, project.
         </Note>
         <Examples>
         # Retrieve the total number of orders placed by each customer.
@@ -71,6 +71,8 @@ class Service:
         Use the relationship IS_CAREER_MENTOR_OF or IS_TECH_MENTOR_OF and return all information
         # Find the mentees of mentor
         Use the relationship IS_CAREER_MENTEE_OF or IS_TECH_MENTEE_OF and return all information
+        # Find the project and people who works on a project
+        Use the relationship WORKS_ON and return all information including project name
         String category values:
         Use existing strings and values from the schema provided. 
         Do not use AS
@@ -91,7 +93,7 @@ class Service:
         {question}
         </Question>
         <Note>
-        If the provided information is empty, respond by stating that you don't know the answer. Empty information is indicated by: []
+        If the provided information is empty, respond by stating that you don't know the answer. Empty information is indicated by: []. If there is a cypher context provided, answer using the context.
         When names are provided in the query results, such as hospital names, be cautious of any names containing commas or other punctuation. For example, 'Jones, Brown and Murray' is a single hospital name, not multiple hospitals. Ensure that any list of names is presented clearly to avoid ambiguity and make the full names easily identifiable.
         Never state that you lack sufficient information if data is present in the query results. Always utilize the data provided.
         Only output relevant information and only use purely text in output formatting. Do not use newline. Just answer the question, do not write any irrelevant sentences. Do not include the question in the output.
@@ -101,6 +103,10 @@ class Service:
         Answer: Bryan Wheeler is the tech mentor of William Hoover
         Question: Find is_tech_mentee_of Scott Stafford
         Answer: Tech mentee of Scott Stafford are: Bryan Wheeler, Kristin Johnson, Jeffery Dominguez
+        Question: Find all person who works on Market Research Tool
+        Answer: Employees who worked on Market Research Tool are: Bryan Wheeler, Kristin Johnson, Jeffery Dominguez
+        Question: Find project of Bryan Wheeler
+        Answer: Bryan Wheeler worked on Market Research Tool, and Digital Payment Integration
         </Format>
         """
 
@@ -138,7 +144,7 @@ class Service:
     def rephrase_prompt(self, question: Question) -> str:
         template = """
         <Note>
-        Rephrase the question to one of the following:
+        Rephrase the question to one of the following and replace the name with the provided name in the context:
         Find is_career_mentor_of <name>
         Find is_tech_mentor_of <name>
         Find is_career_mentee_of <name>
@@ -147,6 +153,8 @@ class Service:
         Find the id of <name>
         Find the full_name of <name>
         Find the position of <name>
+        Find all person who works_on <project>
+        Find project of <name>
         </Note>
         <Question>
         {question}

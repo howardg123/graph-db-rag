@@ -6,9 +6,9 @@ from llm.schemas import Question, ModelEnum
 
 
 def send_request(question: str):
-    url = "http://localhost:8000/generate_response"
+    url = "http://localhost:8888/generate_response"
     payload = Question(question=question,
-                       model=ModelEnum.llama).model_dump()
+                       model=ModelEnum.openai).model_dump()
 
     try:
         response = requests.post(url, params=payload)
@@ -21,10 +21,17 @@ def send_request(question: str):
         return f"Failed to connect: {e}"
 
 
+predefined_messages = [
+    "Who is the tech mentor of Rebecca Carroll?",
+    "Who are the tech mentee of Rebecca Carroll?",
+    "Who are part of Compliance Management System?"
+]
+
 iface = gr.Interface(
     fn=send_request,
     inputs=gr.Textbox(label="Your Question", placeholder="Ask a question..."),
     outputs=gr.Textbox(label="Response"),
+    examples=predefined_messages,
     title="Chatbox"
 )
 

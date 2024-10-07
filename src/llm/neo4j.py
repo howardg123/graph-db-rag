@@ -35,13 +35,13 @@ class Neo4j:
         WITH p, row
         WHERE row.career_mentor IS NOT NULL AND trim(row.career_mentor) <> p.full_name
         MERGE (c:Person {full_name: trim(row.career_mentor)})
-        MERGE (p)-[:IS_CAREER_MENTOR_OF]->(c)
-        MERGE (c)-[:IS_CAREER_MENTEE_OF]->(p)
+        MERGE (c)-[:IS_CAREER_MENTOR_OF]->(p)
+        MERGE (p)-[:IS_CAREER_MENTEE_OF]->(c)
         WITH p, row
         WHERE row.tech_mentor IS NOT NULL
         MERGE (t:Person {full_name: trim(row.tech_mentor)})
-        MERGE (p)-[:IS_TECH_MENTOR_OF]->(t)
-        MERGE (t)-[:IS_TECH_MENTEE_OF]->(p)
+        MERGE (t)-[:IS_TECH_MENTOR_OF]->(p)
+        MERGE (p)-[:IS_TECH_MENTEE_OF]->(t)
         WITH p, row
         WHERE row.project IS NOT NULL AND row.project <> 'None'
         WITH p, replace(replace(replace(row.project, "[", ""), "]", ""), "'", "") AS cleaned_projects

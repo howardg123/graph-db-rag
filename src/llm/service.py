@@ -2,6 +2,7 @@ from langchain.chains import GraphCypherQAChain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
+from langchain_openai import ChatOpenAI
 from .schemas import Question
 from .neo4j import Neo4j
 
@@ -28,6 +29,8 @@ class Service:
     def choose_model(self, model: str = ""):
         if model == "llama":
             return OllamaLLM(model="llama3.1", temperature=0)
+        elif model == "openai":
+            return ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
 
     def generate_response(self, question: Question) -> str:
 
@@ -56,26 +59,14 @@ class Service:
         Always include id, full_name, position, department, tech_mentor, career_mentor, project.
         </Note>
         <Examples>
-        # Retrieve the total number of orders placed by each customer.
-        MATCH (c:Customer)-[o:ORDERED_BY]->(order:Order)
-        RETURN c.customerID AS customer_id, COUNT(o) AS total_orders
-        # List the top 5 products with the highest unit price.
-        MATCH (p:Product)
-        RETURN p.productName AS product_name, p.unitPrice AS unit_price
-        ORDER BY unit_price DESC
-        LIMIT 5
-        # Find all employees who have processed orders.
-        MATCH (e:Employee)-[r:PROCESSED_BY]->(o:Order)
-        RETURN e.employeeID AS employee_id, COUNT(o) AS orders_processed
-        # Find the mentor of mentee
-        Use the relationship IS_CAREER_MENTOR_OF or IS_TECH_MENTOR_OF and return all information
-        # Find the mentees of mentor
-        Use the relationship IS_CAREER_MENTEE_OF or IS_TECH_MENTEE_OF and return all information
+        # Find the mentor of a person
+        Use the relationship IS_CAREER_MENTEE_OF or IS_TECH_MENTOR_OF and return all information
+        # Find the mentees of a person
+        Use the relationship IS_CAREER_MENTOR_OF or IS_TECH_MENTEE_OF and return all information
         # Find the project and people who works on a project
         Use the relationship WORKS_ON and return all information including project name
         String category values:
         Use existing strings and values from the schema provided. 
-        Do not use AS
         </Examples>
         <Question>
         {question}
@@ -134,7 +125,8 @@ class Service:
             allow_dangerous_requests=True
         )
 
-        rephrased_prompt = self.rephrase_prompt(question)
+        # rephrased_prompt = self.rephrase_prompt(question)
+        rephrased_prompt = question.question
 
         response = chain.invoke(
             {rephrased_prompt})
@@ -145,10 +137,10 @@ class Service:
         template = """
         <Note>
         Rephrase the question to one of the following and replace the name with the provided name in the context:
-        Find is_career_mentor_of <name>
-        Find is_tech_mentor_of <name>
-        Find is_career_mentee_of <name>
-        Find is_the_tech_mentee_of <name>
+        Find career mentor of <name>
+        Find tech mentor of <name>
+        Find career mentee of <name>
+        Find tech mentee of <name>
         Find the department of <name>
         Find the id of <name>
         Find the full_name of <name>
@@ -171,4 +163,6 @@ class Service:
         response = chain.invoke(
             {question.question})
 
+        if question.model == "openai":
+            return response.content
         return response

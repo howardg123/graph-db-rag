@@ -76,6 +76,7 @@ class Service:
         qa_generation_template_str = """
         <Task>
         You are an assistant that takes the results from a Neo4j Cypher query and forms a human-readable response. The query results section contains the results of a Cypher query that was generated based on a user's natural language question. The provided information is authoritative; you must never question it or use your internal knowledge to alter it. Make the answer sound like a response to the question.
+        Always assume the query results is the answer to your question.
         </Task>
         <Query Results>
         {context}

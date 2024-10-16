@@ -22,9 +22,9 @@ def send_request(question: str):
 
 
 predefined_messages = [
-    "Who is the tech mentor of Rebecca Carroll?",
+    "Who is Rebecca Carroll's tech mentor?",
     "Who are the tech mentee of Rebecca Carroll?",
-    "Who are part of Compliance Management System?"
+    "Who are part of project Compliance Management System?"
 ]
 
 iface = gr.Interface(
